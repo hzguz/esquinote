@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+  <title>esquinote</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="icon" type="image/svg+xml"
+    href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%236c7852"><path d="M18.377 3.49c-1.862-.31-3.718.62-4.456 2.095-.428.857-.691 1.624-.728 2.361-.035.71.138 1.444.67 2.252.644.854 1.199 1.913 1.608 3.346a.75.75 0 11-1.442.412c-.353-1.236-.82-2.135-1.372-2.865l-.008-.01c-.53-.698-1.14-1.242-1.807-1.778a50.724 50.724 0 00-.667-.524C9.024 7.884 7.71 6.863 6.471 5.16c-.59.287-1.248.798-1.806 1.454-.665.78-1.097 1.66-1.158 2.446.246.36.685.61 1.246.715.643.12 1.278.015 1.633-.182a.75.75 0 11.728 1.311c-.723.402-1.728.516-2.637.346-.916-.172-1.898-.667-2.398-1.666L2 9.427V9.25c0-1.323.678-2.615 1.523-3.607.7-.824 1.59-1.528 2.477-1.917V2.75a.75.75 0 111.5 0v1.27c1.154 1.67 2.363 2.612 3.568 3.551.207.162.415.323.621.489.001-.063.003-.126.006-.188.052-1.034.414-2.017.884-2.958 1.06-2.118 3.594-3.313 6.044-2.904 1.225.204 2.329.795 3.125 1.748C22.546 4.713 23 5.988 23 7.5c0 1.496-.913 3.255-2.688 3.652.838 1.699 1.438 3.768 1.181 5.697-.269 2.017-1.04 3.615-2.582 4.675C17.409 22.558 15.288 23 12.5 23H4.75a.75.75 0 010-1.5h2.322c-.58-.701-.998-1.578-1.223-2.471-.327-1.3-.297-2.786.265-4.131-.92.091-1.985-.02-3.126-.445a.75.75 0 11.524-1.406c1.964.733 3.428.266 4.045-.19.068-.06.137-.12.208-.18a.745.745 0 01.861-.076.746.746 0 01.32.368.752.752 0 01-.173.819c-.077.076-.16.15-.252.221-1.322 1.234-1.62 3.055-1.218 4.654.438 1.737 1.574 2.833 2.69 2.837H12.5c2.674 0 4.429-.433 5.56-1.212 1.094-.752 1.715-1.904 1.946-3.637.236-1.768-.445-3.845-1.407-5.529a.576.576 0 01-.012-.02 3.557.3557 0 01-1.553-.94c-.556-.565-.89-1.243-1.012-1.73a.75.75 0 011.456-.364c.057.231.26.67.626 1.043.35.357.822.623 1.443.623 1.172 0 1.953-1.058 1.953-2.234 0-1.205-.357-2.127-.903-2.78-.547-.654-1.318-1.08-2.22-1.23z"/></svg>'>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+
+  <style>
+    /* CSS Custom Properties for Theming */
+    :root {
+      --bg-primary: #f8f6f2;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f3f4f6;
+      --text-primary: #1f2937;
+      --text-secondary: #4b5563;
+      --text-muted: #9ca3af;
+      --border-color: rgba(0, 0, 0, 0.1);
+      --shadow-color: rgba(0, 0, 0, 0.1);
+      --accent-primary: #6c7852;
+      --accent-primary-dark: #55603f;
+      --group-bg: rgba(0, 0, 0, 0.04);
+      --group-border: rgba(0, 0, 0, 0.06);
+      --scrollbar-thumb: rgba(108, 120, 82, 0.2);
+      --scrollbar-thumb-hover: rgba(108, 120, 82, 0.5);
+      --modal-overlay: rgba(0, 0, 0, 0.5);
+      --header-bg: #6c7852;
+    }
+
+    body {
+      font-family: "Manrope", sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    html {
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background-color: var(--scrollbar-thumb);
+      border-radius: 99px;
+      border: 2px solid transparent;
+      background-clip: content-box;
+      transition: background-color 0.2s;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--scrollbar-thumb-hover);
+      border: 2px solid transparent;
+      background-clip: content-box;
+    }
+
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) transparent;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    /* NOTE GROUP STYLES */
+    .note-group {
+      margin: 12px 0;
+      padding: 4px;
+      border-radius: 18px;
+      background: var(--group-bg);
+      border: 1px solid var(--group-border);
+      transition: background 0.3s ease, border 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: block;
+    }
+
+    .note-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px 8px 12px;
+      cursor: default;
+      user-select: none;
+    }
+
+    .note-group-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .note-group-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease, width 0.3s ease, color 0.2s ease;
+      border-radius: 8px;
+      color: inherit;
+      opacity: 0.4;
+      overflow: hidden;
+    }
+
+    .note-group-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+      opacity: 1;
+    }
+
+    .note-group-delete:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .note-group-delete.confirming {
+      width: auto;
+      padding: 0 10px;
+      background: #ef4444;
+      color: white;
+      opacity: 1;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+
+    .note-group-toggle svg {
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: rotate(0deg);
+    }
+
+    .note-group:not(.collapsed) .note-group-toggle svg {
+      transform: rotate(180deg);
+    }
+
+    /* Ícone de edição do título */
+    .note-group-edit-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      cursor: pointer;
+      margin-left: 6px;
+      padding: 4px;
+      border-radius: 6px;
+      transition: opacity 0.15s ease, background 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .note-group:hover .note-group-edit-icon {
+      opacity: 0.4;
+    }
+
+    .note-group-edit-icon:hover {
+      opacity: 1 !important;
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .note-group-title[contenteditable="true"]~.note-group-edit-icon {
+      display: none;
+    }
+
+    .note-group-title {
+      font-weight: 800;
+      font-size: 14px;
+      text-transform: lowercase !important;
+      opacity: 0.6;
+      flex-grow: 1;
+      outline: none;
+      letter-spacing: 0.02em;
+      margin-right: 12px;
+      text-align: left;
+      line-height: 1.2;
+      border: none;
+    }
+
+    .note-group-title[contenteditable="true"] {
+      opacity: 1;
+      cursor: text;
+    }
+
+    /* Wrapper para animação suave com CSS Grid */
+    .note-group-body {
+      display: grid;
+      grid-template-rows: 1fr;
+      transition: grid-template-rows 0.2s ease-out;
+    }
+
+    .note-group.collapsed .note-group-body {
+      grid-template-rows: 0fr;
+    }
+
+    .note-group-content {
+      padding: 4px 12px 12px 12px;
+      opacity: 1;
+      outline: none;
+      font-size: 15px;
+      line-height: 1.6;
+      overflow: hidden;
+      min-height: 0;
+      transition: opacity 0.15s ease-out, padding 0.2s ease-out;
+    }
+
+    .note-group.collapsed .note-group-content {
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      pointer-events: none;
+    }
+
+    @media (min-width: 768px) {
+      .note-group-content {
+        font-size: 1.05rem;
+      }
+    }
+
+    .note-group.collapsed {
+      background: var(--group-bg);
+    }
+
+    /* Dark mode specific overrides */
+    html.dark .note-group-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    html.dark .note-group-delete:hover {
+      background: rgba(239, 68, 68, 0.15);
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6c7852',
+            'primary-dark': '#55603f',
+          },
+          fontFamily: {
+            sans: ['Manrope', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "framer-motion": "https://esm.sh/framer-motion@^12.23.26",
+    "uuid": "https://esm.sh/uuid@^13.0.0",
+    "tabler-icons-react": "https://esm.sh/tabler-icons-react@^1.56.0",
+    "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
+    "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
+    "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js",
+    "firebase/": "https://esm.sh/firebase@^12.6.0/"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>
