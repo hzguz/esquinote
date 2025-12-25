@@ -30,7 +30,6 @@ export const COLORS: Record<NoteColor, { bg: string; dark: string; text: string 
   purple: { bg: '#f3e8ff', dark: '#e9d5ff', text: '#581c87' },
   pink: { bg: '#fce7f3', dark: '#fbcfe8', text: '#831843' },
   orange: { bg: '#ffedd5', dark: '#fed7aa', text: '#7c2d12' },
-  orange: { bg: '#ffedd5', dark: '#fed7aa', text: '#7c2d12' },
 };
 
 export const COLOR_KEYS: NoteColor[] = ['yellow', 'green', 'blue', 'purple', 'pink', 'orange'];
