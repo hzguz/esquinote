@@ -80,7 +80,7 @@
 
     /* NOTE GROUP STYLES */
     .note-group {
-      margin: 12px 0;
+      margin: 4px 0;
       padding: 4px;
       border-radius: 18px;
       background: var(--group-bg);
@@ -94,10 +94,32 @@
     .note-group-header {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 8px 10px 8px 12px;
+      gap: 4px;
+      padding: 8px 10px 8px 8px;
       cursor: default;
       user-select: none;
+    }
+
+    /* Drag handle for the group */
+    .note-group-drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      cursor: grab;
+      opacity: 0.3;
+      transition: opacity 0.15s ease;
+      flex-shrink: 0;
+      margin-right: 4px;
+    }
+
+    .note-group-drag-handle:hover {
+      opacity: 0.7;
+    }
+
+    .note-group-drag-handle:active {
+      cursor: grabbing;
     }
 
     .note-group-actions {
@@ -105,6 +127,7 @@
       align-items: center;
       gap: 6px;
       flex-shrink: 0;
+      margin-left: auto;
     }
 
     .note-group-btn {
@@ -174,10 +197,6 @@
       background: rgba(0, 0, 0, 0.06);
     }
 
-    .note-group-title[contenteditable="true"]~.note-group-edit-icon {
-      display: none;
-    }
-
     .note-group-title {
       font-weight: 800;
       font-size: 14px;
@@ -186,15 +205,54 @@
       flex-grow: 1;
       outline: none;
       letter-spacing: 0.02em;
-      margin-right: 12px;
+      margin-right: 8px;
       text-align: left;
       line-height: 1.2;
       border: none;
+      /* Single line only */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      /* Editable indicator - background on hover */
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: transparent;
+      transition: opacity 0.15s ease, background 0.15s ease;
+      cursor: default;
+    }
+
+    .note-group-title:hover {
+      background: rgba(0, 0, 0, 0.06);
+      opacity: 0.8;
     }
 
     .note-group-title[contenteditable="true"] {
       opacity: 1;
       cursor: text;
+      background: rgba(0, 0, 0, 0.08);
+    }
+
+    /* Drop indicator line */
+    .note-group-drop-indicator {
+      height: 3px;
+      background: linear-gradient(90deg, transparent, currentColor, transparent);
+      border-radius: 2px;
+      opacity: 0.6;
+      margin: 4px 0;
+      pointer-events: none;
+      animation: pulse-indicator 0.8s ease-in-out infinite;
+    }
+
+    @keyframes pulse-indicator {
+
+      0%,
+      100% {
+        opacity: 0.4;
+      }
+
+      50% {
+        opacity: 0.8;
+      }
     }
 
     /* Wrapper para animação suave com CSS Grid */
@@ -243,6 +301,13 @@
 
     html.dark .note-group-delete:hover {
       background: rgba(239, 68, 68, 0.15);
+    }
+
+    /* Drag state for groups */
+    .note-group.dragging {
+      opacity: 0.5;
+      border-style: dashed;
+      border-color: currentColor;
     }
   </style>
   <script>
