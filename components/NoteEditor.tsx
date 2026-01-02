@@ -34,6 +34,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
   const modalRef = useRef<HTMLDivElement>(null);
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const lastSyncId = useRef<string | null>(null);
+  const dropTargetRef = useRef<{ node: Node, position: 'before' | 'after' } | null>(null);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -661,9 +662,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
 
                           if (!contentEditableRef.current) return;
 
-                          // Remove any existing indicator
-                          const existingIndicator = contentEditableRef.current.querySelector('.note-group-drop-indicator');
-
                           // Get caret position 
                           let range: Range | null = null;
                           if (document.caretRangeFromPoint) {
@@ -677,98 +675,110 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                             }
                           }
 
-                          // Create or reuse the indicator
-                          let indicator = existingIndicator as HTMLElement;
-                          if (!indicator) {
-                            indicator = document.createElement('div');
-                            indicator.className = 'note-group-drop-indicator';
-                            indicator.setAttribute('contenteditable', 'false');
-                          }
-
-                          // Find the best insertion point (between lines, not in middle of text)
+                          // Find the best insertion point
                           let insertionPoint: { node: Node; position: 'before' | 'after' } | null = null;
 
                           if (range) {
                             let targetNode: Node | null = range.commonAncestorContainer;
 
-                            // Check if we're inside a group - don't show indicator there
+                            // Check if we're inside a group - don't show indicator inside, but around
                             const targetGroup = targetNode.nodeType === 1
                               ? (targetNode as HTMLElement).closest('.note-group')
                               : targetNode.parentElement?.closest('.note-group');
 
                             if (targetGroup) {
-                              // Check if mouse is above the group (in the top 25% of its height)
                               const groupRect = targetGroup.getBoundingClientRect();
-                              const threshold = groupRect.top + groupRect.height * 0.25;
-
-                              if (e.clientY < threshold) {
-                                // Insert before this group
-                                insertionPoint = { node: targetGroup, position: 'before' };
-                              } else if (e.clientY > groupRect.bottom - groupRect.height * 0.25) {
-                                // Insert after this group
-                                insertionPoint = { node: targetGroup, position: 'after' };
-                              } else {
-                                // In the middle of the group, don't show indicator
-                                existingIndicator?.remove();
-                                return;
-                              }
+                              // Histerese para evitar flicker: 50% split
+                              const midPoint = groupRect.top + groupRect.height / 2;
+                              insertionPoint = {
+                                node: targetGroup,
+                                position: e.clientY < midPoint ? 'before' : 'after'
+                              };
                             } else {
-                              // Find the nearest block-level sibling or line break
-                              // Walk up to find a direct child of the contenteditable
+                              // Find block-level element
                               while (targetNode && targetNode.parentNode !== contentEditableRef.current) {
                                 targetNode = targetNode.parentNode;
                               }
 
                               if (targetNode) {
-                                // Determine if we should insert before or after this node
                                 const rect = targetNode.nodeType === 1
                                   ? (targetNode as HTMLElement).getBoundingClientRect()
                                   : null;
 
                                 if (rect) {
-                                  // Use 30% threshold for easier "before" targeting
-                                  const threshold = rect.top + rect.height * 0.3;
+                                  const midPoint = rect.top + rect.height / 2;
                                   insertionPoint = {
                                     node: targetNode,
-                                    position: e.clientY < threshold ? 'before' : 'after'
+                                    position: e.clientY < midPoint ? 'before' : 'after'
                                   };
                                 } else {
-                                  // Text node - check relative position
+                                  // Text node
                                   insertionPoint = { node: targetNode, position: 'after' };
                                 }
                               }
                             }
                           }
 
-                          // Special case: if we're very close to the top of the editor, insert at beginning
-                          const editorRect = contentEditableRef.current.getBoundingClientRect();
-                          if (e.clientY < editorRect.top + 20) {
-                            insertionPoint = null; // Will trigger fallback to insert at beginning
+                          // Fallback if no valid point found
+                          if (!insertionPoint) {
+                            if (contentEditableRef.current.firstChild) {
+                              insertionPoint = { node: contentEditableRef.current.firstChild, position: 'before' };
+                            } else {
+                              // Empty editor
+                              dropTargetRef.current = null;
+                            }
                           }
 
-                          // Insert the indicator at the determined position
-                          try {
-                            if (insertionPoint) {
-                              if (insertionPoint.position === 'before') {
-                                insertionPoint.node.parentNode?.insertBefore(indicator, insertionPoint.node);
+                          dropTargetRef.current = insertionPoint;
+
+                          // --- VISUAL INDICATOR UPDATE ---
+                          let indicator = contentEditableRef.current.querySelector('.note-group-drop-indicator') as HTMLElement;
+                          if (!indicator) {
+                            indicator = document.createElement('div');
+                            indicator.className = 'note-group-drop-indicator';
+                            contentEditableRef.current.appendChild(indicator);
+                          }
+
+                          if (insertionPoint) {
+                            const targetEl = insertionPoint.node.nodeType === 1
+                              ? (insertionPoint.node as HTMLElement)
+                              : insertionPoint.node.parentElement; // Fallback for text nodes
+
+                            if (targetEl) {
+                              // Precisamos calcular a posição relativa ao contentEditableRef
+                              const editorRect = contentEditableRef.current.getBoundingClientRect();
+
+                              let top = 0;
+                              if (insertionPoint.node.nodeType === 1) {
+                                const rect = (insertionPoint.node as HTMLElement).getBoundingClientRect();
+                                top = (insertionPoint.position === 'before' ? rect.top : rect.bottom) - editorRect.top;
                               } else {
-                                insertionPoint.node.parentNode?.insertBefore(indicator, insertionPoint.node.nextSibling);
+                                // Para text nodes, usamos range
+                                const r = document.createRange();
+                                r.selectNode(insertionPoint.node);
+                                const rect = r.getBoundingClientRect();
+                                top = (insertionPoint.position === 'before' ? rect.top : rect.bottom) - editorRect.top;
                               }
-                            } else {
-                              // Fallback: insert at beginning
-                              contentEditableRef.current.insertBefore(indicator, contentEditableRef.current.firstChild);
+
+                              indicator.style.top = `${top}px`;
+                              indicator.style.opacity = '1';
                             }
-                          } catch (err) {
-                            // Fallback: insert at beginning if anything fails
-                            contentEditableRef.current.insertBefore(indicator, contentEditableRef.current.firstChild);
+                          } else {
+                            // Fim do editor ou vazio
+                            // Se vazio, top = 0
+                            if (!contentEditableRef.current.firstChild) {
+                              indicator.style.top = '0px';
+                              indicator.style.opacity = '1';
+                            }
                           }
                         }
                       }}
                       onDragLeave={(e) => {
-                        // Remove drop indicator when leaving
+                        // Remove drop indicator ONLY if really leaving the editor
                         if (contentEditableRef.current && !contentEditableRef.current.contains(e.relatedTarget as Node)) {
-                          const indicator = contentEditableRef.current.querySelector('.note-group-drop-indicator');
-                          indicator?.remove();
+                          const indicator = contentEditableRef.current.querySelector('.note-group-drop-indicator') as HTMLElement;
+                          if (indicator) indicator.style.opacity = '0';
+                          dropTargetRef.current = null;
                         }
                       }}
                       onDrop={(e) => {
@@ -779,38 +789,40 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
 
                           if (!contentEditableRef.current) return;
 
-                          // Remove drop indicator
-                          const indicator = contentEditableRef.current.querySelector('.note-group-drop-indicator');
+                          // Remove indicator visual
+                          const indicator = contentEditableRef.current.querySelector('.note-group-drop-indicator') as HTMLElement;
+                          if (indicator) indicator.remove();
 
-                          // Find the dragging group
+                          // Find dragging group
                           const draggingGroup = contentEditableRef.current.querySelector('.note-group.dragging');
-                          if (!draggingGroup) {
-                            indicator?.remove();
-                            return;
-                          }
+                          if (!draggingGroup) return;
 
-                          if (indicator) {
-                            // Insert the group where the indicator is
-                            indicator.replaceWith(draggingGroup);
+                          const target = dropTargetRef.current;
 
-                            // Ensure there's a space after the group
-                            if (!draggingGroup.nextSibling || (draggingGroup.nextSibling.nodeType === 3 && draggingGroup.nextSibling.textContent === '')) {
-                              const space = document.createTextNode('\u00A0');
-                              draggingGroup.after(space);
+                          if (target) {
+                            if (target.position === 'before') {
+                              target.node.parentNode?.insertBefore(draggingGroup, target.node);
+                            } else {
+                              target.node.parentNode?.insertBefore(draggingGroup, target.node.nextSibling);
                             }
                           } else {
-                            // No indicator found - fallback to inserting at beginning
-                            contentEditableRef.current.insertBefore(draggingGroup, contentEditableRef.current.firstChild);
+                            // Fallback: append to end if no target (or empty)
+                            contentEditableRef.current.appendChild(draggingGroup);
+                          }
+
+                          // Ensure spacing
+                          if (!draggingGroup.nextSibling || (draggingGroup.nextSibling.nodeType === 3 && draggingGroup.nextSibling.textContent === '')) {
                             const space = document.createTextNode('\u00A0');
                             draggingGroup.after(space);
                           }
 
                           handleContentChange({ currentTarget: contentEditableRef.current } as any);
+                          dropTargetRef.current = null;
                         }
                       }}
                       className={`w-full flex-grow text-[15px] md:text-[17px] leading-relaxed bg-transparent border-none outline-none resize-none transition-opacity empty:before:content-[attr(data-placeholder)] empty:before:opacity-50 select-text min-h-[50vh] ${readOnly ? 'opacity-80 cursor-default' : 'opacity-90 focus:opacity-100 cursor-text'}`}
                       data-placeholder={t.writeThoughts}
-                      style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', outline: 'none' }}
+                      style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap', outline: 'none', position: 'relative' }}
                     />
                   )}
 
