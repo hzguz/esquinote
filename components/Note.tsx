@@ -15,7 +15,7 @@ interface NoteProps {
   isMobile?: boolean;
   isGridMode?: boolean;
   isInsideColumn?: boolean;
-  onGridDrop?: (noteId: string, point: { x: number, y: number }, finalPos?: { x: number, y: number }) => void;
+  onGridDrop?: (noteId: string, point: { x: number, y: number }, finalPos?: { x: number, y: number }, dragOffset?: { x: number, y: number }) => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
   onSwap?: (sourceId: string, targetId: string) => void;
@@ -68,6 +68,7 @@ const Note: React.FC<NoteProps> = ({
   const t = TRANSLATIONS[lang];
   const [isDragging, setIsDragging] = useState(false);
   const clickStartRef = useRef<{ x: number; y: number } | null>(null);
+  const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const lastColCheckTime = useRef(0);
   const x = useMotionValue(note.x);
@@ -86,9 +87,25 @@ const Note: React.FC<NoteProps> = ({
   const springTilt = useSpring(tilt, { damping: 15, stiffness: 120, mass: 0.8 });
   const combinedRotation = useTransform(springTilt, (currentTilt) => isGridMode ? 0 : (note.rotation + currentTilt));
 
-  const handleDragStart = () => {
+  const handleDragStart = (event: MouseEvent | TouchEvent | PointerEvent) => {
     if (readOnly) return;
     setIsDragging(true);
+
+    // Guardar offset de onde o usuário clicou dentro da nota (para posicionamento preciso ao soltar)
+    const noteEl = (event.target as HTMLElement).closest('[data-note-id]');
+    if (noteEl) {
+      const rect = noteEl.getBoundingClientRect();
+      let clientX = 0, clientY = 0;
+      if ('touches' in event && event.touches.length > 0) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+      } else if ('clientX' in event) {
+        clientX = event.clientX;
+        clientY = event.clientY;
+      }
+      dragOffsetRef.current = { x: clientX - rect.left, y: clientY - rect.top };
+    }
+
     if (onDragStart) onDragStart();
   }
 
@@ -169,8 +186,8 @@ const Note: React.FC<NoteProps> = ({
     // Se onGridDrop está disponível, usar para lógica unificada
     // Caso contrário, usar onUpdatePosition diretamente com motion values
     if (onGridDrop) {
-      // onGridDrop recebe screen coordinates e final motion values
-      onGridDrop(note.id, { x: clientX, y: clientY }, { x: x.get(), y: y.get() });
+      // onGridDrop recebe screen coordinates, final motion values e offset do arraste
+      onGridDrop(note.id, { x: clientX, y: clientY }, { x: x.get(), y: y.get() }, dragOffsetRef.current);
     } else {
       // Fallback: usar motion values diretamente (já são coordenadas do viewport)
       onUpdatePosition(note.id, x.get(), y.get());

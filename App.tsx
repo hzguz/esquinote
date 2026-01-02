@@ -377,7 +377,7 @@ function App() {
 
     // --- LÓGICA UNIFICADA DE DROP ---
     // Funciona para: Modo Livre, Modo Grid, Desktop e Mobile
-    const handleGridDrop = useCallback((noteId: string, point: { x: number, y: number }, finalPos?: { x: number, y: number }) => {
+    const handleGridDrop = useCallback((noteId: string, point: { x: number, y: number }, finalPos?: { x: number, y: number }, dragOffset?: { x: number, y: number }) => {
         if (isReadOnly && !spyTarget) return;
         setDraggingId(null);
         setDragOverColumnId(null);
@@ -493,9 +493,15 @@ function App() {
             // CASO 3: RELEASE - Modo livre, soltou fora de qualquer coluna
             // ========================================
             if (!isGridMode && sourceColId) {
-                // Usar finalPos se disponível (motion values), caso contrário converter screen coords
-                const x = finalPos?.x ?? point.x;
-                const y = finalPos?.y ?? point.y;
+                // IMPORTANTE: Notas dentro de colunas usam position: relative, então seus motion values
+                // NÃO são atualizados durante o drag. Devemos sempre converter screen coords para viewport.
+                // Também subtraímos o dragOffset para posicionar a nota corretamente baseado em onde o usuário clicou.
+                const vx = viewportX.get();
+                const vy = viewportY.get();
+                const offsetX = dragOffset?.x ?? 0;
+                const offsetY = dragOffset?.y ?? 0;
+                const x = point.x - vx - offsetX;
+                const y = point.y - vy - offsetY;
 
                 const updated = {
                     ...sourceNote,
@@ -511,6 +517,7 @@ function App() {
                 }
                 return prev.map(n => n.id === noteId ? updated : n);
             }
+
 
             // ========================================
             // CASO 4: MOVE - Modo livre, nota já livre reposicionada
