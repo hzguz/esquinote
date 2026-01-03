@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, User } from 'firebase/auth';
-import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, writeBatch, getDoc, getDocs, where, updateDoc, orderBy, limit, startAfter, DocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, setDoc, deleteDoc, onSnapshot, query, writeBatch, getDoc, getDocs, where, updateDoc, orderBy, limit, startAfter, DocumentSnapshot, QuerySnapshot } from 'firebase/firestore';
 import { NoteData, UserProfile } from '../types';
 
 // =================================================================
@@ -9,9 +9,9 @@ import { NoteData, UserProfile } from '../types';
 // =================================================================
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCSnilocgCe3lKuH_JTjraupEQmUeT-TLM",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "muranote-74cde.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "muranote-74cde",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "muranote-74cde.firebasestorage.app",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "esquinote-74cde.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "esquinote-74cde",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "esquinote-74cde.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "607504984748",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:607504984748:web:0dd900fbab8047bf3ecd09",
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-LSERJ5NTMB"
@@ -20,7 +20,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+
+// Initialize Firestore with persistent multi-tab cache
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
 
 export { auth, db };
 
@@ -55,11 +59,9 @@ export const logout = async () => {
 // --- ADMIN USERS LIST ---
 
 export const getUsersPaginated = async (lastDoc: DocumentSnapshot | null, pageSize: number = 10) => {
-  if (!db) return { users: [], lastVisible: null };
-
   let q = query(
     collection(db, 'users'),
-    orderBy('email'), // Ordenar por email para consistência
+    orderBy('email'),
     limit(pageSize)
   );
 
@@ -91,7 +93,6 @@ const generateMatchCode = () => {
 };
 
 export const initializeUserProfile = async (user: User) => {
-  if (!db) return;
   const userRef = doc(db, 'users', user.uid);
   const snap = await getDoc(userRef);
 
@@ -116,24 +117,28 @@ export const initializeUserProfile = async (user: User) => {
 };
 
 export const subscribeToUserProfile = (userId: string, callback: (profile: UserProfile | null) => void) => {
-  if (!db) return () => { };
-  return onSnapshot(doc(db, 'users', userId), (doc) => {
-    if (doc.exists()) {
-      callback(doc.data() as UserProfile);
-    } else {
+  return onSnapshot(
+    doc(db, 'users', userId),
+    (docSnap) => {
+      if (docSnap.exists()) {
+        callback(docSnap.data() as UserProfile);
+      } else {
+        callback(null);
+      }
+    },
+    (error) => {
+      console.error('Firestore profile subscription error:', error);
       callback(null);
     }
-  });
+  );
 };
 
 export const updateAdminPassword = async (userId: string, password: string) => {
-  if (!db) return;
   const userRef = doc(db, 'users', userId);
   await updateDoc(userRef, { adminPassword: password });
 };
 
 export const sendMatchRequest = async (currentUserId: string, targetCode: string) => {
-  if (!db) return;
 
   // 1. Find user by code
   const q = query(collection(db, 'users'), where('matchCode', '==', targetCode));
@@ -174,8 +179,6 @@ export const sendMatchRequest = async (currentUserId: string, targetCode: string
 };
 
 export const acceptMatchRequest = async (currentUserId: string, requesterId: string) => {
-  if (!db) return;
-
   const currentUserRef = doc(db, 'users', currentUserId);
   const requesterRef = doc(db, 'users', requesterId);
 
@@ -209,8 +212,6 @@ export const acceptMatchRequest = async (currentUserId: string, requesterId: str
 };
 
 export const declineMatchRequest = async (currentUserId: string, requesterId: string) => {
-  if (!db) return;
-
   const batch = writeBatch(db);
   const currentUserRef = doc(db, 'users', currentUserId);
   const requesterRef = doc(db, 'users', requesterId);
@@ -222,8 +223,6 @@ export const declineMatchRequest = async (currentUserId: string, requesterId: st
 };
 
 export const unmatchUser = async (currentUserId: string, partnerId: string) => {
-  if (!db) return;
-
   const batch = writeBatch(db);
   const currentUserRef = doc(db, 'users', currentUserId);
   const partnerRef = doc(db, 'users', partnerId);
@@ -238,34 +237,36 @@ export const unmatchUser = async (currentUserId: string, partnerId: string) => {
 
 // Updated to accept an optional specific userId to fetch notes from (for match viewing)
 export const subscribeToNotes = (userId: string, callback: (notes: NoteData[]) => void) => {
-  if (!db) return () => { };
-
   const q = query(collection(db, `users/${userId}/notes`));
 
-  const unsubscribe = onSnapshot(q, (snapshot: QuerySnapshot) => {
-    const notes: NoteData[] = [];
-    snapshot.forEach((doc) => {
-      notes.push(doc.data() as NoteData);
-    });
-    callback(notes);
-  });
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot: QuerySnapshot) => {
+      const notes: NoteData[] = [];
+      snapshot.forEach((docSnap) => {
+        notes.push(docSnap.data() as NoteData);
+      });
+      callback(notes);
+    },
+    (error) => {
+      console.error('Firestore notes subscription error:', error);
+      callback([]);
+    }
+  );
 
   return unsubscribe;
 };
 
 export const saveNoteToCloud = async (userId: string, note: NoteData) => {
-  if (!db) return;
-  // Limpa undefined antes de salvar
   await setDoc(doc(db, `users/${userId}/notes`, note.id), cleanUndefined(note));
 };
 
 export const deleteNoteFromCloud = async (userId: string, noteId: string) => {
-  if (!db) return;
   await deleteDoc(doc(db, `users/${userId}/notes`, noteId));
 };
 
 export const syncLocalToCloud = async (userId: string, localNotes: NoteData[]) => {
-  if (!db || localNotes.length === 0) return;
+  if (localNotes.length === 0) return;
 
   // Batch write to upload all local notes
   const batch = writeBatch(db);
