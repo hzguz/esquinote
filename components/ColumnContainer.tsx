@@ -92,7 +92,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                     isDefaultColumn ? (
                         <div
                             className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-black/5 text-black/30"
-                            title={t.mainColumn || "coluna principal"}
+                            title={t.mainColumn}
                         >
                             <Lock size={14} />
                         </div>
@@ -271,7 +271,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                     isDefaultColumn ? (
                         <div
                             className="ml-2 p-1.5 rounded-full bg-black/5 text-black/30"
-                            title={t.mainColumn || "coluna principal"}
+                            title={t.mainColumn}
                         >
                             <Lock size={14} />
                         </div>
@@ -306,7 +306,7 @@ const ColumnContainer: React.FC<ColumnContainerProps> = ({
                             >
                                 <Plus size={18} className="text-primary/20" />
                             </motion.div>
-                            <span className="text-primary/30 text-xs font-medium lowercase">arraste notas aqui</span>
+                            <span className="text-primary/30 text-xs font-medium lowercase">{t.dragNotesHere || "drag notes here"}</span>
                         </div>
                     </div>
                 ) : (

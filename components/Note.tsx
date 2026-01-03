@@ -60,7 +60,7 @@ const Note: React.FC<NoteProps> = ({
   stroke,
   layoutId,
   readOnly = false,
-  lang = 'pt'
+  lang = 'en'
 }) => {
   // Fallback seguro se a cor não existir (ex: notas antigas 'white')
   const colorDef = COLORS[note.color] || COLORS['yellow'];

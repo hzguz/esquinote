@@ -5,12 +5,12 @@ import { TRANSLATIONS } from '../constants';
 interface LanguageContextType {
     lang: Language;
     setLang: (lang: Language) => void;
-    t: typeof TRANSLATIONS['pt'];
+    t: typeof TRANSLATIONS['en'];
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const LANG_STORAGE_KEY = 'esquinote_lang';
+const LANG_STORAGE_KEY = 'muranote_lang';
 
 interface LanguageProviderProps {
     children: ReactNode;
@@ -18,15 +18,8 @@ interface LanguageProviderProps {
 
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
     const [lang, setLangState] = useState<Language>(() => {
-        // Check localStorage first
         const saved = localStorage.getItem(LANG_STORAGE_KEY) as Language;
-        if (saved === 'pt' || saved === 'en') return saved;
-
-        // Check browser language
-        const browserLang = navigator.language.toLowerCase();
-        if (!browserLang.startsWith('pt')) return 'en';
-
-        return 'pt';
+        return saved === 'en' ? saved : 'en';
     });
 
     const t = TRANSLATIONS[lang];

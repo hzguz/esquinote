@@ -29,7 +29,7 @@ const GoogleIcon = ({ size = 22 }: { size?: number }) => (
   </svg>
 );
 
-const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImport, user, onLogin, onLogout, stroke, lang = 'pt' }) => {
+const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImport, user, onLogin, onLogout, stroke, lang = 'en' }) => {
   const t = TRANSLATIONS[lang];
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -130,7 +130,7 @@ const DataControl: React.FC<DataControlProps> = ({ isOpen, onClose, notes, onImp
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `esquinote - backup - ${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `muranote - backup - ${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

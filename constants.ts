@@ -1,9 +1,9 @@
 
 import { NoteColor, TitleSize } from './types';
 
-export const APP_NAME = "esquinote";
-export const STORAGE_KEY = "esquinote_data_v1";
-export const STORAGE_COLS_KEY = "esquinote_cols_v1";
+export const APP_NAME = "muranote";
+export const STORAGE_KEY = "muranote_data_v1";
+export const STORAGE_COLS_KEY = "muranote_cols_v1";
 
 // --- ADMIN CONFIGURATION ---
 export const ADMIN_EMAIL = 'gustasoaresdesigner@gmail.com';
@@ -63,87 +63,6 @@ export const TITLE_ICONS = [
 ];
 
 export const TRANSLATIONS = {
-  pt: {
-    developedBy: 'desenvolvido por',
-    startJourney: 'comece sua jornada',
-    tapToCreate: 'toque aqui para criar sua primeira nota',
-    signIn: 'fazer login',
-    signInGoogle: 'entrar com google',
-    signInDesc: 'sincronize suas notas e faça match com amigos.',
-    enterNow: 'entrar agora',
-    myProfile: 'configurações',
-    addTitle: 'adicionar título',
-    addNote: 'adicionar nota',
-    newCol: 'criar nova coluna',
-    spyMode: 'spy:',
-    exitSpy: 'sair do modo espião',
-    colDefault: 'principal',
-    colNew: 'nova coluna',
-    addCol: 'adicionar coluna',
-    centerView: 'voltar ao centro',
-    newTitle: 'novo título',
-    newNote: 'nota nova',
-    titlePlaceholder: 'texto do título...',
-    titleDef: 'defina um título...',
-    writeThoughts: 'escreva seus pensamentos aqui',
-    selectIcon: 'selecionar ícone',
-    deleteConfirm: 'apagar?',
-    yes: 'sim',
-    no: 'não',
-    accessData: 'acesso & dados',
-    loadingProfile: 'carregando perfil...',
-    matchActive: 'match ativo',
-    pending: 'aguardando...',
-    cancel: 'cancelar',
-    matchRequest: 'solicitação de match!',
-    codePlaceholder: 'código',
-    connect: 'conectar',
-    logout: 'sair da conta',
-    localBackup: 'backup local',
-    download: 'baixar',
-    restore: 'restaurar',
-    copyCode: 'código copiado!',
-    reqSent: 'solicitação enviada!',
-    errorCode: 'o código deve ter 5 dígitos.',
-    errorConnect: 'erro ao conectar.',
-    matchSuccess: 'match realizado! ❤️',
-    matchUndo: 'match desfeito.',
-    backupExport: 'backup exportado!',
-    backupRestore: 'backup restaurado!',
-    errorFile: 'arquivo inválido.',
-    undoMatchConfirm: 'deseja realmente desfazer o match? você perderá acesso às notas do parceiro.',
-    groupTitle: 'novo grupo',
-    createGroup: 'criar grupo',
-    godMode: 'god mode',
-    secureAccess: 'acesso restrito',
-    restrictedMsg: 'digite a senha de administrador.',
-    unlock: 'desbloquear',
-    setupPass: 'configurar senha',
-    setupMsg: 'definir senha administrativa.',
-    setPass: 'definir senha',
-    tools: 'ferramentas',
-    users: 'usuários',
-    genNotes: 'gerar 10 notas',
-    resetMatch: 'resetar match',
-    nukeNotes: 'apagar tudo',
-    userList: 'lista de usuários',
-    update: 'atualizar',
-    loadMore: 'carregar mais',
-    adminConsole: 'admin console',
-    whatsNewTitle: 'novidades!',
-    whatsNewContent: 'Agora você pode adicionar grupos dentro das suas anotações e criar colunas no modo livre!',
-    gotIt: 'entendi',
-    readingFilter: 'filtro de leitura',
-    filterIntensity: 'intensidade',
-    errorAccept: 'erro ao aceitar.',
-    errorDecline: 'erro ao recusar.',
-    errorUnmatch: 'erro ao desfazer.',
-    errorExport: 'falha ao exportar.',
-    undoMatch: 'desfazer match?',
-    confirm: 'confirmar',
-    mainColumn: 'coluna principal',
-    offline: 'sem conexão'
-  },
   en: {
     developedBy: 'developed by',
     startJourney: 'start your journey',
@@ -223,6 +142,7 @@ export const TRANSLATIONS = {
     undoMatch: 'undo match?',
     confirm: 'confirm',
     mainColumn: 'main column',
+    dragNotesHere: 'drag notes here',
     offline: 'offline'
   }
 };

@@ -2,7 +2,7 @@
 export type NoteColor = 'yellow' | 'green' | 'blue' | 'purple' | 'pink' | 'orange';
 export type NoteType = 'note' | 'title';
 export type TitleSize = 'small' | 'medium' | 'large';
-export type Language = 'pt' | 'en';
+export type Language = 'en';
 
 export interface NoteData {
   id: string;

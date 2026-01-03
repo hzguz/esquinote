@@ -1,4 +1,4 @@
-# esquinote
+# muranote
 
 uma parede de notas adesivas digitais fluida e offline-first, projetada para liberdade criativa e organização orgânica.
 

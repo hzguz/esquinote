@@ -122,7 +122,7 @@ const FABMenu: React.FC<FABMenuProps> = ({
                     onClick={() => setIsOpen(!isOpen)}
                     className={`fixed bottom-8 right-8 w-16 h-16 rounded-full shadow-lg shadow-primary/30 transition-colors flex items-center justify-center z-[40000] ${isOpen ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:bg-primary-dark'
                         } text-white`}
-                    aria-label="nova nota"
+                    aria-label="new note"
                 >
                     <Plus size={32} strokeWidth={2} />
                 </motion.button>

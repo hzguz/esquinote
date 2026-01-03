@@ -9,9 +9,9 @@ import { NoteData, UserProfile } from '../types';
 // =================================================================
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCSnilocgCe3lKuH_JTjraupEQmUeT-TLM",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "esquinote-74cde.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "esquinote-74cde",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "esquinote-74cde.firebasestorage.app",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "muranote-74cde.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "muranote-74cde",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "muranote-74cde.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "607504984748",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:607504984748:web:0dd900fbab8047bf3ecd09",
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-LSERJ5NTMB"

@@ -22,7 +22,7 @@ const IconMap: Record<string, React.ComponentType<{ size?: number; strokeWidth?:
   Book, Book2, Notebook, Quote, Pencil, Bookmark, Typography, Search, Bulb, Heart, Circle
 };
 
-const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, onDelete, stroke, lang = 'pt', readOnly = false }) => {
+const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, onDelete, stroke, lang = 'en', readOnly = false }) => {
   const t = TRANSLATIONS[lang];
   const [editedNote, setEditedNote] = useState<NoteData | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -211,7 +211,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
     const dragHandle = document.createElement('span');
     dragHandle.className = 'note-group-drag-handle';
     dragHandle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>`;
-    dragHandle.setAttribute('title', lang === 'pt' ? 'arrastar grupo' : 'drag group');
+    dragHandle.setAttribute('title', 'drag group');
 
     const title = document.createElement('span');
     title.className = 'note-group-title';
@@ -432,7 +432,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
         btn.classList.add('confirming');
         // Salva o HTML original do ícone para restaurar depois
         const originalIcon = btn.innerHTML;
-        btn.innerText = t.deleteConfirm; // "Confirm?"
+        btn.innerText = t.deleteConfirm; // "delete?"
 
         // Remove a classe após 2.5s se não confirmar
         setTimeout(() => {
@@ -607,7 +607,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, isOpen, onClose, onSave, 
                     />
                   )) : (
                     <div className="flex items-center gap-2 opacity-40 text-[10px] md:text-xs font-bold tracking-widest lowercase">
-                      <Lock size={14} /> {lang === 'pt' ? 'modo leitura' : 'read only'}
+                      <Lock size={14} /> read only
                     </div>
                   )}
                 </div>

@@ -67,7 +67,7 @@ function App() {
     const [viewMode, setViewMode] = useState<ViewMode>('free');
     const [isModeTransitioning, setIsModeTransitioning] = useState(false);
     const [hasSwitchedMode, setHasSwitchedMode] = useState(false);
-    const [logoText, setLogoText] = useState("esquinote");
+    const [logoText, setLogoText] = useState("muranote");
     const [currentStroke, setCurrentStroke] = useState(ICON_STROKE_WIDTH.desktop);
 
     const viewportX = useMotionValue(0);
@@ -99,7 +99,7 @@ function App() {
 
     // Reading filter state (0 = off, 1-50 = intensity)
     const [readingFilterIntensity, setReadingFilterIntensity] = useState(() => {
-        const saved = localStorage.getItem('esquinote_reading_filter');
+        const saved = localStorage.getItem('muranote_reading_filter');
         return saved ? JSON.parse(saved) : 0;
     });
 
@@ -331,7 +331,7 @@ function App() {
 
     // Save reading filter settings
     useEffect(() => {
-        localStorage.setItem('esquinote_reading_filter', JSON.stringify(readingFilterIntensity));
+        localStorage.setItem('muranote_reading_filter', JSON.stringify(readingFilterIntensity));
     }, [readingFilterIntensity]);
 
     useEffect(() => {
@@ -684,8 +684,8 @@ function App() {
         if (zIndices.length > 0) setMaxZIndex(Math.max(...zIndices) + 1);
     }, [isReadOnly, spyTarget, user]);
 
-    const handleLogoEnter = () => { setLogoText("esquizonote"); runTimerRef.current = setTimeout(() => { setIsRunningAway(true); }, 1000); };
-    const handleLogoLeave = () => { setLogoText("esquinote"); if (runTimerRef.current) clearTimeout(runTimerRef.current); setIsRunningAway(false); };
+    const handleLogoEnter = () => { setLogoText("schizonote"); runTimerRef.current = setTimeout(() => { setIsRunningAway(true); }, 1000); };
+    const handleLogoLeave = () => { setLogoText("muranote"); if (runTimerRef.current) clearTimeout(runTimerRef.current); setIsRunningAway(false); };
 
     const handleDragOverColumn = useCallback((colId: string | null) => { if (!isReadOnly || spyTarget) setDragOverColumnId(colId); }, [isReadOnly, spyTarget]);
 
@@ -954,7 +954,7 @@ function App() {
                         <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} onClick={(e) => e.stopPropagation()} className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6">
                             <div className="flex items-center gap-3 text-red-600 mb-4"><div className="bg-red-100 p-2 rounded-full"><AlertTriangle size={24} strokeWidth={currentStroke} /></div><h3 className="text-lg font-bold text-gray-800 lowercase">{authError.title}</h3></div>
                             <p className="text-gray-600 mb-4 leading-relaxed lowercase">{authError.message}</p>
-                            <div className="flex justify-end"><button onClick={() => setAuthError(null)} className="px-5 py-2.5 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black transition-colors lowercase">entendi</button></div>
+                            <div className="flex justify-end"><button onClick={() => setAuthError(null)} className="px-5 py-2.5 bg-gray-900 text-white rounded-2xl font-bold text-sm hover:bg-black transition-colors lowercase">got it</button></div>
                         </motion.div>
                     </motion.div>
                 )}
