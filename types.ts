@@ -62,4 +62,6 @@ export interface UserProfile {
   matchPartnerPhoto?: string;
   matchRequestFrom?: string; // UID of the requester
   adminPassword?: string; // Password for admin actions
+  isBanned?: boolean; // Whether user is banned from using the app
+  banReason?: string; // Custom ban message from admin
 }

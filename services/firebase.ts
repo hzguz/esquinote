@@ -138,6 +138,16 @@ export const updateAdminPassword = async (userId: string, password: string) => {
   await updateDoc(userRef, { adminPassword: password });
 };
 
+export const banUser = async (userId: string, reason?: string) => {
+  const userRef = doc(db, 'users', userId);
+  await updateDoc(userRef, { isBanned: true, banReason: reason || null });
+};
+
+export const unbanUser = async (userId: string) => {
+  const userRef = doc(db, 'users', userId);
+  await updateDoc(userRef, { isBanned: false, banReason: null });
+};
+
 export const sendMatchRequest = async (currentUserId: string, targetCode: string) => {
 
   // 1. Find user by code

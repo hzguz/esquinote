@@ -959,6 +959,44 @@ function App() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Banned User Blocking Modal */}
+            <AnimatePresence>
+                {userProfile?.isBanned && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="fixed inset-0 bg-red-950 z-[70000] flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.8, y: 30 }}
+                            animate={{ scale: 1, y: 0 }}
+                            className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 text-center"
+                        >
+                            <div className="w-20 h-20 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
+                                <AlertTriangle size={40} className="text-red-600" strokeWidth={1.5} />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2 lowercase">conta suspensa</h2>
+                            <p className="text-gray-600 mb-6 leading-relaxed">
+                                {userProfile.banReason || 'sua conta foi suspensa por violar os termos de uso.'}
+                            </p>
+                            <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
+                                <p className="text-xs text-gray-400 mb-1 uppercase font-bold tracking-wide">conta</p>
+                                <p className="text-sm text-gray-700">{user?.email}</p>
+                            </div>
+                            <button
+                                onClick={() => logout()}
+                                className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition-colors lowercase"
+                            >
+                                sair
+                            </button>
+                            <p className="text-[10px] text-gray-400 mt-4">
+                                se acredita que isso é um erro, entre em contato com o suporte.
+                            </p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <FABMenu
                 isOpen={isFabMenuOpen}
                 setIsOpen={setIsFabMenuOpen}

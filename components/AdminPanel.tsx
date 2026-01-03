@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, X, Database, Trash, Refresh, Lock, Key, Check, Users, Tools, Eye, ChevronRight, ChevronLeft, Language as LanguageIcon } from 'tabler-icons-react';
+import { Shield, X, Database, Trash, Refresh, Lock, Key, Check, Users, Tools, Eye, ChevronRight, ChevronLeft, Language as LanguageIcon, Ban } from 'tabler-icons-react';
 import { User } from 'firebase/auth';
 import { DocumentSnapshot } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { doc, writeBatch, updateDoc } from 'firebase/firestore';
-import { db, updateAdminPassword, getUsersPaginated } from '../services/firebase';
+import { db, updateAdminPassword, getUsersPaginated, banUser, unbanUser } from '../services/firebase';
 import { NoteData, UserProfile, Language } from '../types';
 import { COLOR_KEYS, INITIAL_NOTE_WIDTH, INITIAL_NOTE_HEIGHT, TRANSLATIONS } from '../constants';
 
@@ -129,6 +129,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, u
         if (onSpyUser) {
             onSpyUser({ id: targetUser.uid, name: targetUser.displayName });
             onClose();
+        }
+    };
+
+    const handleBan = async (targetUser: UserProfile) => {
+        const reason = prompt(`Motivo do banimento para ${targetUser.displayName}:`, 'Violação dos termos de uso');
+        if (reason === null) return; // Cancelled
+
+        setIsLoading(true);
+        try {
+            await banUser(targetUser.uid, reason);
+            log(`${targetUser.displayName} foi banido.`);
+            setUsersList(prev => prev.map(u => u.uid === targetUser.uid ? { ...u, isBanned: true, banReason: reason } : u));
+        } catch (e: any) {
+            log(`Erro: ${e.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleUnban = async (targetUser: UserProfile) => {
+        setIsLoading(true);
+        try {
+            await unbanUser(targetUser.uid);
+            log(`${targetUser.displayName} foi desbanido.`);
+            setUsersList(prev => prev.map(u => u.uid === targetUser.uid ? { ...u, isBanned: false } : u));
+        } catch (e: any) {
+            log(`Erro: ${e.message}`);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -366,13 +395,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, u
 
                                                 <div className="space-y-2">
                                                     {usersList.map((u) => (
-                                                        <div key={u.uid} className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-center justify-between group hover:border-gray-500 transition-colors">
+                                                        <div key={u.uid} className={`p-3 rounded-lg border flex items-center justify-between group transition-colors ${u.isBanned ? 'bg-red-900/20 border-red-900/50' : 'bg-gray-800 border-gray-700 hover:border-gray-500'}`}>
                                                             <div className="flex items-center gap-3">
-                                                                <img src={u.photoURL || 'https://via.placeholder.com/40'} alt="User" className="w-8 h-8 rounded-full bg-gray-900" />
+                                                                <div className="relative">
+                                                                    <img src={u.photoURL || 'https://via.placeholder.com/40'} alt="User" className={`w-8 h-8 rounded-full bg-gray-900 ${u.isBanned ? 'opacity-50 grayscale' : ''}`} />
+                                                                    {u.isBanned && <div className="absolute -top-1 -right-1 bg-red-500 w-4 h-4 rounded-full flex items-center justify-center"><Ban size={10} className="text-white" /></div>}
+                                                                </div>
                                                                 <div>
                                                                     <div className="text-xs font-bold text-white flex items-center gap-2">
                                                                         {u.displayName}
                                                                         <span className="text-[10px] font-normal text-gray-500 bg-gray-900 px-1.5 rounded">{u.matchCode}</span>
+                                                                        {u.isBanned && <span className="text-[10px] font-bold text-red-400 bg-red-900/50 px-1.5 rounded">BANIDO</span>}
                                                                     </div>
                                                                     <div className="text-[10px] text-gray-500">{u.email}</div>
                                                                     <div className="text-[10px] mt-0.5">
@@ -385,13 +418,32 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose, user, notes, u
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            <button
-                                                                onClick={() => handleSpy(u)}
-                                                                className="p-2 bg-gray-900 hover:bg-blue-600 hover:text-white rounded-lg text-gray-400 transition-colors relative group-hover:scale-105"
-                                                                title="Espiar Notas"
-                                                            >
-                                                                <Eye size={18} />
-                                                            </button>
+                                                            <div className="flex items-center gap-2">
+                                                                {u.isBanned ? (
+                                                                    <button
+                                                                        onClick={() => handleUnban(u)}
+                                                                        className="p-2 bg-green-900/30 hover:bg-green-600 hover:text-white rounded-lg text-green-400 transition-colors text-[10px] font-bold"
+                                                                        title="Desbanir"
+                                                                    >
+                                                                        DESBANIR
+                                                                    </button>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => handleBan(u)}
+                                                                        className="p-2 bg-gray-900 hover:bg-red-600 hover:text-white rounded-lg text-gray-400 transition-colors"
+                                                                        title="Banir"
+                                                                    >
+                                                                        <Ban size={18} />
+                                                                    </button>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => handleSpy(u)}
+                                                                    className="p-2 bg-gray-900 hover:bg-blue-600 hover:text-white rounded-lg text-gray-400 transition-colors relative group-hover:scale-105"
+                                                                    title="Espiar Notas"
+                                                                >
+                                                                    <Eye size={18} />
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     ))}
                                                 </div>
